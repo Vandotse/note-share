@@ -34,6 +34,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { toast } from "sonner";
 import Image from "next/image";
+import { Protect } from "@clerk/nextjs";
 
 function FileCardActions({file, isFavorited}: {file: Doc<"files">, isFavorited: boolean}){
     const deleteFile = useMutation(api.files.deleteFile);
@@ -82,12 +83,14 @@ function FileCardActions({file, isFavorited}: {file: Doc<"files">, isFavorited: 
                             </div>
                         )}
                     </DropdownMenuItem>
+                    <Protect role="org:admin" fallback={<></>}>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                     onClick={() => setIsConfirmOpen(true)}
                     className="flex gap-1 text-red-600 items-center cursor-pointer">
                         <TrashIcon className="w=4 h=4" /> Delete
                     </DropdownMenuItem>
+                    </Protect>
                 </DropdownMenuContent>
             </DropdownMenu>
         </>
@@ -118,12 +121,15 @@ export function FileCard({file, favorites}: { file: Doc<"files">, favorites: Doc
             </CardHeader>
             <CardContent className="h-[200px] flex justify-center items-center">
                 {file.type === "image" && fileUrl && (
-                    <Image 
-                        alt={file.name} 
-                        width="200" 
-                        height="100" 
-                        src={fileUrl} 
-                    />
+                    <div className="w-full h-full overflow-hidden rounded-md">
+                        <Image 
+                            alt={file.name} 
+                            width="200" 
+                            height="100" 
+                            src={fileUrl} 
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
                 )}
 
                 {file.type === "csv" && <GanttChartIcon className="w-20 h-20" />}

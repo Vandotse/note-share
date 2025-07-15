@@ -32,6 +32,14 @@ http.route({
           await ctx.runMutation(internal.users.addOrgIdToUser, {
             tokenIdentifier: `https://primary-boa-48.clerk.accounts.dev|${result.data.public_user_data.user_id}`,
             orgId: result.data.organization.id,
+            role: result.data.role === "org:admin" ? "org:admin" : "org:member",
+          });
+          break;
+        case "organizationMembership.updated":
+          await ctx.runMutation(internal.users.updateRoleInOrgForUser, {
+            tokenIdentifier: `https://primary-boa-48.clerk.accounts.dev|${result.data.public_user_data.user_id}`,
+            orgId: result.data.organization.id,
+            role: result.data.role === "org:admin" ? "org:admin" : "org:member",
           });
           break;
       }
