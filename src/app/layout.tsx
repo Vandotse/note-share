@@ -4,6 +4,7 @@ import "./globals.css";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { Header } from "./header";
 import { Toaster } from "@/components/ui/sonner"
+import { Footer } from "./footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           <Toaster />
           <Header />
           {children}
+          <Footer />
         </ConvexClientProvider>
       </body>
     </html>
