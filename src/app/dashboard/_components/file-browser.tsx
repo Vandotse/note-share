@@ -1,5 +1,11 @@
 "use client";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useOrganization, useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -12,6 +18,8 @@ import { DataTable } from "./file-table";
 import { columns } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GridIcon, Loader2, RowsIcon, TableIcon } from "lucide-react";
+import { Doc } from "../../../../convex/_generated/dataModel";
+import { Label } from "@/components/ui/label";
 
 function Placeholder() {
   return (
@@ -31,7 +39,8 @@ export function FileBrowser({title, favoritesOnly, deletedOnly }: {title: string
   const organization = useOrganization();
   const user = useUser();
   const [query, setQuery] = useState("");
-
+  const [type, setType] = useState<Doc<"files">["type"] | "all">("all");
+ 
   let orgId: string | undefined = undefined;
   if (organization.isLoaded && user.isLoaded) {
     orgId= organization.organization?.id ?? user.user?.id;
@@ -42,7 +51,7 @@ export function FileBrowser({title, favoritesOnly, deletedOnly }: {title: string
     orgId ? { orgId} : "skip",
   )
 
-  const files = useQuery(api.files.getFiles, orgId ? { orgId, query, favorites: favoritesOnly, deletedOnly } : "skip")
+  const files = useQuery(api.files.getFiles, orgId ? { orgId, type: type === "all" ? undefined: type, query, favorites: favoritesOnly, deletedOnly } : "skip")
   const isLoading = files === undefined
 
   const modifiedFiles = files?.map(file =>({
@@ -62,7 +71,8 @@ export function FileBrowser({title, favoritesOnly, deletedOnly }: {title: string
           </div>
 
           <Tabs defaultValue="grid">
-            <TabsList className="mb-8">
+            <div className="flex justify-between items-center">
+            <TabsList className="mb-2">
               <TabsTrigger value="grid" className="flex gap-2 items-center">
                 <GridIcon />
                 Grid
@@ -72,6 +82,24 @@ export function FileBrowser({title, favoritesOnly, deletedOnly }: {title: string
                 Table
               </TabsTrigger>
             </TabsList>
+            <div className="flex gap-2 itmes-center">
+              <Label htmlFor="type-select">Type Filter</Label>
+              <Select value = {type} onValueChange={(newType) => {
+                setType(newType as any)
+              }}>
+                <SelectTrigger id="type-select" className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="image">Image</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            </div>
+
             {isLoading && (
               <div className="flex flex-col gap-8 w-full items-center mt-24">
                 <Loader2 className="w-32 h-32 animate-spin text-gray-500" />

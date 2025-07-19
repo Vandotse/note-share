@@ -28,6 +28,8 @@ export function FileCardActions({file, isFavorited}: {file: Doc<"files">, isFavo
     const restoreFile = useMutation(api.files.restoreFile);
     const toggleFavorite = useMutation(api.files.toggleFavorite);
     const fileUrl = useQuery(api.files.getFileUrl, { fileId: file.fileId })
+    const me = useQuery(api.users.getMe);
+
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     return (
@@ -82,7 +84,11 @@ export function FileCardActions({file, isFavorited}: {file: Doc<"files">, isFavo
                             </div>
                         )}
                     </DropdownMenuItem>
-                    <Protect role="org:admin" fallback={<></>}>
+                    <Protect condition={(check) => {
+                        return check({
+                            role: "org:admin",
+                        }) || file.userId === me?._id;
+                    }} fallback={<></>}>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                     onClick={() => {
